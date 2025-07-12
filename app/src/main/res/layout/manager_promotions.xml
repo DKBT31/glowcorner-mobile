@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#FAFAFA">
+
+    <!-- Filter Section with Promotion Name, ID, and ProductID filters -->
+    <LinearLayout
+        android:id="@+id/filter_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
+        android:paddingBottom="8dp"
+        android:weightSum="3">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Promotion Name"
+                android:textSize="14sp"
+                android:textColor="#333333" />
+
+            <EditText
+                android:id="@+id/et_filter_promotion_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter name"
+                android:singleLine="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ID"
+                android:textSize="14sp"
+                android:textColor="#333333" />
+
+            <EditText
+                android:id="@+id/et_filter_promotion_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter ID"
+                android:inputType="number"
+                android:singleLine="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Product ID"
+                android:textSize="14sp"
+                android:textColor="#333333" />
+
+            <EditText
+                android:id="@+id/et_filter_product_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter Product ID"
+                android:inputType="number"
+                android:singleLine="true" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Create New Promotion Button -->
+    <Button
+        android:id="@+id/btn_create_promotion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create New Promotion"
+        android:layout_below="@id/filter_section"
+        android:layout_marginTop="8dp" />
+
+    <!-- Apply Filters Button -->
+    <Button
+        android:id="@+id/btn_apply_filters"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Apply Filters"
+        android:layout_toEndOf="@id/btn_create_promotion"
+        android:layout_alignTop="@id/btn_create_promotion"
+        android:layout_marginStart="8dp" />
+
+    <!-- RecyclerView for Promotions -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_promotions"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/btn_create_promotion"
+        android:layout_marginTop="16dp" />
+
+</RelativeLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="textColorPrimary">#FF000000</color>
+    <color name="textColorSecondary">#666666</color>
+    <color name="text_secondary">#666666</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="blue">#0000FF</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="red_error">#FF0000</color>
+    <color name="red">#FF0000</color>
+    <color name="light_gray">#F5F5F5</color>
+    <color name="gray_border">#E0E0E0</color>
+    <color name="error">#B00020</color>
+    <color name="background">#FFFFFF</color>
+    <!-- Màu chính dùng cho mục được chọn -->
+    <color name="nav_selected_color">#3F51B5</color>
+
+    <!-- Màu xám cho mục chưa chọn -->
+    <color name="nav_unselected_color">#666666</color>
+
+    <color name="nav_header_subtitle_color">#B0BEC5</color>
+
+    <!-- Order Status Colors -->
+    <color name="pending_color">#FF9800</color>
+    <color name="completed_color">#4CAF50</color>
+    <color name="cancelled_color">#F44336</color>
+    <color name="processing_color">#2196F3</color>
+    <color name="default_color">#FF03DAC5</color>
+
+</resources>
