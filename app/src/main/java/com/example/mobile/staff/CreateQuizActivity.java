@@ -15,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.mobile.Api.ApiClient;
 import com.example.mobile.Api.ApiService;
 import com.example.mobile.R;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
