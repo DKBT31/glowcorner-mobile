@@ -131,11 +131,17 @@ public class SignInActivity extends AppCompatActivity {
 
             // Navigate based on user role
             Intent intent;
-            String role = data.getRole();
-            if ("STAFF".equals(role) || "MANAGER".equals(role)) {
-                intent = new Intent(this, ManagerProductsActivity.class);
-            } else {
+            String userRole = data.getRole();
+            if ("CUSTOMER".equals(userRole)) {
                 intent = new Intent(this, HomeActivity.class);
+            } else if ("STAFF".equals(userRole)) {
+                intent = new Intent(this, StaffHomeActivity.class);
+            } else if ("MANAGER".equals(userRole)) {
+                intent = new Intent(this, ManagerHomeActivity.class);
+            } else {
+                Log.w(TAG, "Unknown user role: " + userRole);
+                Toast.makeText(this, "Unknown user role", Toast.LENGTH_SHORT).show();
+                return;
             }
 
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -3,7 +3,6 @@ package com.example.mobile.Adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +37,7 @@ public class ManagerProductAdapter extends RecyclerView.Adapter<ManagerProductAd
 
     @Override
     public ManagerProductViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_manager_product, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.manager_item_product, parent, false);
         context = parent.getContext();
         return new ManagerProductViewHolder(view);
     }

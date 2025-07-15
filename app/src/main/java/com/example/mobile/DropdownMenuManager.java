@@ -66,14 +66,25 @@ public class DropdownMenuManager {
 
         // Setup menu items
         ImageButton profileMenuItem = dialogView.findViewById(R.id.profile_menu_item);
+        ImageButton routineMenuItem = dialogView.findViewById(R.id.routine_menu_item);
         ImageButton logoutMenuItem = dialogView.findViewById(R.id.logout_menu_item);
 
-        if (profileMenuItem != null && logoutMenuItem != null) {
+        if (profileMenuItem != null && routineMenuItem != null && logoutMenuItem != null) {
             profileMenuItem.setOnClickListener(v -> {
                 Log.d(TAG, "Profile clicked");
                 dropdownDialog.dismiss();
                 if (!(activity instanceof ProfileActivity)) {
                     Intent intent = new Intent(activity, ProfileActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    activity.startActivity(intent);
+                }
+            });
+
+            routineMenuItem.setOnClickListener(v -> {
+                Log.d(TAG, "Routine clicked");
+                dropdownDialog.dismiss();
+                if (!(activity instanceof UserRoutineActivity)) {
+                    Intent intent = new Intent(activity, UserRoutineActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     activity.startActivity(intent);
                 }

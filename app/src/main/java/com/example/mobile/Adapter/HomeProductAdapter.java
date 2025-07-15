@@ -1,6 +1,7 @@
 package com.example.mobile.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
@@ -18,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.example.mobile.Api.ApiClient;
 import com.example.mobile.Api.ApiService;
 import com.example.mobile.Models.Product;
+import com.example.mobile.ProductDetailActivity;
 import com.example.mobile.R;
 import com.example.mobile.SignInActivity;
 
@@ -58,12 +60,10 @@ public class HomeProductAdapter extends RecyclerView.Adapter<HomeProductAdapter.
         String skinTypes = product.getSkinTypes().isEmpty() ? "N/A" : String.join(", ", product.getSkinTypes());
         holder.skinTypesTextView.setText(skinTypes);
 
-        // New logic: show both price and discountedPrice if price > discountedPrice
+        // Price and discounted price logic
         Double price = product.getPrice();
         Double discountedPrice = product.getDiscountedPrice();
-
         if (discountedPrice != null && price > discountedPrice) {
-            // Show both prices
             holder.priceTextView.setVisibility(View.VISIBLE);
             holder.discountedPriceTextView.setVisibility(View.VISIBLE);
 
@@ -74,10 +74,8 @@ public class HomeProductAdapter extends RecyclerView.Adapter<HomeProductAdapter.
             holder.discountedPriceTextView.setText(String.format("$%.2f", discountedPrice));
             holder.discountedPriceTextView.setTextColor(Color.RED);
         } else {
-            // Show only price
             holder.priceTextView.setVisibility(View.VISIBLE);
             holder.discountedPriceTextView.setVisibility(View.GONE);
-
             holder.priceTextView.setText(String.format("$%.2f", price));
             holder.priceTextView.setPaintFlags(holder.priceTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             holder.priceTextView.setTextColor(Color.BLACK);
@@ -89,6 +87,13 @@ public class HomeProductAdapter extends RecyclerView.Adapter<HomeProductAdapter.
         } else {
             holder.productImageView.setImageResource(R.drawable.bo); // fallback image
         }
+
+        // Navigate to product detail on card click
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ProductDetailActivity.class);
+            intent.putExtra("productID", product.getProductID());
+            context.startActivity(intent);
+        });
 
         // Add to cart
         holder.addButton.setOnClickListener(v -> {
@@ -110,7 +115,6 @@ public class HomeProductAdapter extends RecyclerView.Adapter<HomeProductAdapter.
                     if (response.isSuccessful() && response.body() != null) {
                         try {
                             String responseString = response.body().string();
-                            Log.d(TAG, "Response String: " + responseString);
                             if ("success".equalsIgnoreCase(responseString) || responseString.contains("\"success\":true")) {
                                 Toast.makeText(context, "Added to cart successfully!", Toast.LENGTH_SHORT).show();
                             } else {
@@ -126,7 +130,6 @@ public class HomeProductAdapter extends RecyclerView.Adapter<HomeProductAdapter.
                         if (errorBody != null) {
                             try {
                                 errorMsg = errorBody.string();
-                                Log.e(TAG, "Raw Response: " + errorMsg);
                             } catch (Exception e) {
                                 Log.e(TAG, "Error reading response body: " + e.getMessage());
                             }

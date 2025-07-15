@@ -24,12 +24,14 @@
         <activity android:name=".CheckoutActivity" />
         <activity android:name=".EditProfileActivity" />
         <activity android:name=".HomeActivity" />
+        <activity android:name=".ProductDetailActivity" />
         <activity android:name=".ManagerHomeActivity" />
         <activity android:name=".OrderDetailActivity" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".QuizActivity" />
         <activity android:name=".ResultActivity" />
         <activity android:name=".RoutineDetailActivity" />
+        <activity android:name=".UserRoutineActivity" />
         <activity android:name=".SignUpActivity" />
         <activity android:name=".StaffHomeActivity" />
         <activity android:name=".SuccessActivity" />
@@ -48,6 +50,10 @@
 
 
         <activity android:name=".manager.ManagerRoutinesActivity" />
+        <activity android:name=".manager.ManagerRoutineDetailActivity" />
+        <!--        <activity android:name=".manager.CreateRoutineActivity" />-->
+        <!--        <activity android:name=".manager.EditRoutineActivity" />-->
+
 
         <activity android:name=".manager.ManagerProductsActivity" />
         <activity android:name=".manager.EditProductActivity" />
@@ -56,7 +62,9 @@
 
 
         <activity android:name=".staff.StaffSkinQuizActivity" />
-
+        <activity android:name=".staff.EditQuizActivity" />
+        <activity android:name=".staff.CreateQuizActivity" />
+        <activity android:name=".staff.StaffFeedbackActivity" />
 
         <activity android:name=".SignInActivity"
             android:exported="true">

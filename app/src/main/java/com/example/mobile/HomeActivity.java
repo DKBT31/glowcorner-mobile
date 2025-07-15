@@ -18,7 +18,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -165,9 +164,8 @@ public class HomeActivity extends AppCompatActivity {
                 // Navigate to Profile Activity
                 startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
                 return true;
-            } else if (itemId == R.id.menu_orders) {
-                // Navigate to Orders (you might need to create this activity)
-                // startActivity(new Intent(HomeActivity.this, OrdersActivity.class));
+            } else if (itemId == R.id.menu_routine) {
+                startActivity(new Intent(HomeActivity.this, UserRoutineActivity.class));
                 return true;
             } else if (itemId == R.id.menu_logout) {
                 // Handle logout
@@ -190,7 +188,7 @@ public class HomeActivity extends AppCompatActivity {
             if (itemId == R.id.menu_profile) {
                 startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
                 return true;
-            } else if (itemId == R.id.menu_orders) {
+            } else if (itemId == R.id.menu_routine) {
                 // Navigate to orders activity
                 return true;
             } else if (itemId == R.id.menu_logout) {
@@ -273,7 +271,7 @@ public class HomeActivity extends AppCompatActivity {
     private void searchProduct(String query) {
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
         Call<ProductResponse> call = query.matches("\\d+") ?
-                apiService.getProductById(query) :
+                apiService.getFilterProductById(query) :
                 apiService.getProductsByName(query);
 
         call.enqueue(new Callback<ProductResponse>() {

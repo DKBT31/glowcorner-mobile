@@ -123,12 +123,8 @@ public class OrderDetailActivity extends AppCompatActivity {
                             // Set status background color
                             setStatusBackgroundColor(status);
 
-                            // Check user role to hide checkout for staff
-                            String userRole = SignInActivity.getStoredValue(OrderDetailActivity.this, "userRole");
-                            if ("STAFF".equals(userRole)) {
-                                unpaidMessageTextView.setVisibility(View.GONE);
-                                checkoutButton.setVisibility(View.GONE);
-                            } else if ("PENDING".equals(status)) {
+                            // Check order status to show/hide checkout button and message
+                            if ("PENDING".equalsIgnoreCase(status)) {
                                 unpaidMessageTextView.setVisibility(View.VISIBLE);
                                 checkoutButton.setVisibility(View.VISIBLE);
                                 checkoutButton.setOnClickListener(v -> handleCheckout(orderId, displayAmount));

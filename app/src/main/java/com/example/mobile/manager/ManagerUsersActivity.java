@@ -13,8 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -96,7 +94,7 @@ public class ManagerUsersActivity extends AppCompatActivity {
 
         @Override
         public UserViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.manager_item_user, parent, false);
             return new UserViewHolder(view);
         }
 

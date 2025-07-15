@@ -1,11 +1,8 @@
 package com.example.mobile;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,8 +14,7 @@ import com.example.mobile.Adapter.HomeProductAdapter;
 import com.example.mobile.Api.ApiClient;
 import com.example.mobile.Api.ApiService;
 import com.example.mobile.Models.Product;
-import com.example.mobile.Models.RoutineResponse;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.mobile.Models.UserRoutineResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,34 +25,20 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class RoutineDetailActivity extends AppCompatActivity {
-    private static final String TAG = "RoutineDetailActivity";
+public class UserRoutineActivity extends AppCompatActivity {
+    private static final String TAG = "UserRoutineActivity";
     private TextView routineNameTextView;
     private TextView routineDescriptionTextView;
     private RecyclerView cleanserRecyclerView, tonerRecyclerView, serumRecyclerView;
     private RecyclerView moisturizerRecyclerView, sunscreenRecyclerView, maskRecyclerView;
     private TextView cleanserHeader, tonerHeader, serumHeader;
     private TextView moisturizerHeader, sunscreenHeader, maskHeader;
-    private Button applyButton;
-    private String routineId;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_routine_detail);
-
-        // Get routineID from Intent or SharedPreferences
-        routineId = getIntent().getStringExtra("routineID");
-        if (routineId == null) {
-            SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-            routineId = prefs.getString("routineID", null);
-            if (routineId == null) {
-                Log.e(TAG, "Routine ID not provided in Intent or SharedPreferences");
-                Toast.makeText(this, "Routine ID not provided", Toast.LENGTH_SHORT).show();
-                finish();
-                return;
-            }
-        }
+        setContentView(R.layout.activity_user_routine);
 
         // Initialize UI components
         routineNameTextView = findViewById(R.id.routine_name);
@@ -73,7 +55,6 @@ public class RoutineDetailActivity extends AppCompatActivity {
         moisturizerHeader = findViewById(R.id.moisturizer_header);
         sunscreenHeader = findViewById(R.id.sunscreen_header);
         maskHeader = findViewById(R.id.mask_header);
-        applyButton = findViewById(R.id.apply_button);
 
         // Setup RecyclerViews
         setupRecyclerView(cleanserRecyclerView);
@@ -83,19 +64,17 @@ public class RoutineDetailActivity extends AppCompatActivity {
         setupRecyclerView(sunscreenRecyclerView);
         setupRecyclerView(maskRecyclerView);
 
-        // Setup Apply Button click listener
-        applyButton.setOnClickListener(v -> applyRoutine());
+        // Get userID from SharedPreferences
+        userId = SignInActivity.getStoredValue(this, "userID");
+        if (userId == null) {
+            Log.e(TAG, "User ID not found in SharedPreferences");
+            Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // Setup navigation
-        setupNavigation();
-
-        Log.d(TAG, "onCreate: Loading routine details for routineId: " + routineId);
-        loadRoutineDetails();
-    }
-
-    private void setupNavigation() {
-        NavigationManager.setupNavigation(this, findViewById(R.id.bottom_navigation));
-        // Removed DropdownMenuManager, only using bottom navigation
+        Log.d(TAG, "onCreate: Loading user routine for userId: " + userId);
+        loadUserRoutine();
     }
 
     private void setupRecyclerView(RecyclerView recyclerView) {
@@ -103,63 +82,26 @@ public class RoutineDetailActivity extends AppCompatActivity {
         recyclerView.setAdapter(new HomeProductAdapter(null));
     }
 
-    private void applyRoutine() {
-        String userID = SignInActivity.getStoredValue(this, "userID");
-
-        if (userID == null) {
-            Log.e(TAG, "User ID not found in SharedPreferences");
-            Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    private void loadUserRoutine() {
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<RoutineResponse> call = apiService.applyRoutineToUser(routineId, userID);
-        call.enqueue(new Callback<RoutineResponse>() {
+        Call<UserRoutineResponse> call = apiService.getUserById(userId);
+        call.enqueue(new Callback<UserRoutineResponse>() {
             @Override
-            public void onResponse(Call<RoutineResponse> call, Response<RoutineResponse> response) {
+            public void onResponse(Call<UserRoutineResponse> call, Response<UserRoutineResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(RoutineDetailActivity.this, "Routine applied successfully", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Routine applied successfully for userId: " + userID + ", routineId: " + routineId);
-                } else {
-                    String errorMsg = response.body() != null ? response.body().getDescription() : response.message();
-                    Log.e(TAG, "Failed to apply routine: " + errorMsg);
-                    if (response.errorBody() != null) {
-                        try {
-                            Log.e(TAG, "Error body: " + response.errorBody().string());
-                        } catch (IOException e) {
-                            Log.e(TAG, "Error reading error body: " + e.getMessage());
-                        }
-                    }
-                    Toast.makeText(RoutineDetailActivity.this, "Failed to apply routine: " + errorMsg, Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<RoutineResponse> call, Throwable t) {
-                Log.e(TAG, "Apply routine API call failed: " + t.getMessage(), t);
-                Toast.makeText(RoutineDetailActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void loadRoutineDetails() {
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<RoutineResponse> call = apiService.getRoutineById1(routineId);
-        call.enqueue(new Callback<RoutineResponse>() {
-            @Override
-            public void onResponse(Call<RoutineResponse> call, Response<RoutineResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    RoutineResponse.RoutineData data = response.body().getData();
-                    if (data == null) {
-                        Log.e(TAG, "Routine data is null");
-                        Toast.makeText(RoutineDetailActivity.this, "No routine data found", Toast.LENGTH_SHORT).show();
+                    UserRoutineResponse.UserData userData = response.body().getData();
+                    if (userData == null || userData.getSkinCareRoutine() == null) {
+                        Log.e(TAG, "User data or skinCareRoutine is null");
+                        Toast.makeText(UserRoutineActivity.this, "No routine data found", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    routineNameTextView.setText(data.getRoutineName() != null ? data.getRoutineName() : "N/A");
-                    routineDescriptionTextView.setText(data.getRoutineDescription() != null ? data.getRoutineDescription() : "N/A");
+
+                    UserRoutineResponse.RoutineData routineData = userData.getSkinCareRoutine();
+                    routineNameTextView.setText(routineData.getRoutineName() != null ? routineData.getRoutineName() : "N/A");
+                    routineDescriptionTextView.setText(routineData.getRoutineDescription() != null ? routineData.getRoutineDescription() : "N/A");
 
                     // Group products by category
-                    List<Product> products = data.getProductDTOS() != null ? data.getProductDTOS() : new ArrayList<>();
+                    List<Product> products = routineData.getProducts() != null ? routineData.getProducts() : new ArrayList<>();
                     List<Product> cleansers = products.stream()
                             .filter(p -> "Cleanser".equalsIgnoreCase(p.getCategory()))
                             .collect(Collectors.toList());
@@ -187,7 +129,7 @@ public class RoutineDetailActivity extends AppCompatActivity {
                     updateSection(sunscreenHeader, sunscreenRecyclerView, sunscreens);
                     updateSection(maskHeader, maskRecyclerView, masks);
 
-                    Log.d(TAG, "Loaded routine: " + data.getRoutineName() + " with " + products.size() + " products");
+                    Log.d(TAG, "Loaded routine: " + routineData.getRoutineName() + " with " + products.size() + " products");
                 } else {
                     String errorMsg = response.body() != null ? response.body().getDescription() : response.message();
                     Log.e(TAG, "Response unsuccessful: " + errorMsg);
@@ -198,14 +140,14 @@ public class RoutineDetailActivity extends AppCompatActivity {
                             Log.e(TAG, "Error reading error body: " + e.getMessage());
                         }
                     }
-                    Toast.makeText(RoutineDetailActivity.this, "Failed to load routine: " + errorMsg, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UserRoutineActivity.this, "Failed to load routine: " + errorMsg, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<RoutineResponse> call, Throwable t) {
+            public void onFailure(Call<UserRoutineResponse> call, Throwable t) {
                 Log.e(TAG, "API Call Failed: " + t.getMessage(), t);
-                Toast.makeText(RoutineDetailActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(UserRoutineActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

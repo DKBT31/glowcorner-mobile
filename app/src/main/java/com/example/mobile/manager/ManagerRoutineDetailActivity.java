@@ -1,6 +1,5 @@
-package com.example.mobile;
+package com.example.mobile.manager;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +17,8 @@ import com.example.mobile.Api.ApiClient;
 import com.example.mobile.Api.ApiService;
 import com.example.mobile.Models.Product;
 import com.example.mobile.Models.RoutineResponse;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.mobile.R;
+import com.example.mobile.SignInActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,21 +29,21 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class RoutineDetailActivity extends AppCompatActivity {
-    private static final String TAG = "RoutineDetailActivity";
+public class ManagerRoutineDetailActivity extends AppCompatActivity {
+    private static final String TAG = "ManagerRoutineDetailActivity";
     private TextView routineNameTextView;
     private TextView routineDescriptionTextView;
     private RecyclerView cleanserRecyclerView, tonerRecyclerView, serumRecyclerView;
     private RecyclerView moisturizerRecyclerView, sunscreenRecyclerView, maskRecyclerView;
     private TextView cleanserHeader, tonerHeader, serumHeader;
     private TextView moisturizerHeader, sunscreenHeader, maskHeader;
-    private Button applyButton;
+    private Button applyButton, editButton, deleteButton; // Added edit and delete buttons for manager
     private String routineId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_routine_detail);
+        setContentView(R.layout.manager_routine_detail); // Reusing the same layout for now
 
         // Get routineID from Intent or SharedPreferences
         routineId = getIntent().getStringExtra("routineID");
@@ -74,6 +74,8 @@ public class RoutineDetailActivity extends AppCompatActivity {
         sunscreenHeader = findViewById(R.id.sunscreen_header);
         maskHeader = findViewById(R.id.mask_header);
         applyButton = findViewById(R.id.apply_button);
+        editButton = findViewById(R.id.edit_button); // Placeholder, add to layout if needed
+        deleteButton = findViewById(R.id.delete_button); // Placeholder, add to layout if needed
 
         // Setup RecyclerViews
         setupRecyclerView(cleanserRecyclerView);
@@ -86,22 +88,28 @@ public class RoutineDetailActivity extends AppCompatActivity {
         // Setup Apply Button click listener
         applyButton.setOnClickListener(v -> applyRoutine());
 
-        // Setup navigation
-        setupNavigation();
+        // Setup Edit and Delete Button click listeners (placeholders)
+        if (editButton != null) {
+            editButton.setOnClickListener(v -> {
+                Toast.makeText(this, "Edit routine (to be implemented)", Toast.LENGTH_SHORT).show();
+            });
+        }
+        if (deleteButton != null) {
+            deleteButton.setOnClickListener(v -> {
+                Toast.makeText(this, "Delete routine (to be implemented)", Toast.LENGTH_SHORT).show();
+            });
+        }
 
         Log.d(TAG, "onCreate: Loading routine details for routineId: " + routineId);
         loadRoutineDetails();
-    }
-
-    private void setupNavigation() {
-        NavigationManager.setupNavigation(this, findViewById(R.id.bottom_navigation));
-        // Removed DropdownMenuManager, only using bottom navigation
     }
 
     private void setupRecyclerView(RecyclerView recyclerView) {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new HomeProductAdapter(null));
     }
+
+    private static final String PREF_NAME = "AppPrefs"; // Ensure it matches the name when saving
 
     private void applyRoutine() {
         String userID = SignInActivity.getStoredValue(this, "userID");
@@ -118,7 +126,7 @@ public class RoutineDetailActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<RoutineResponse> call, Response<RoutineResponse> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(RoutineDetailActivity.this, "Routine applied successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ManagerRoutineDetailActivity.this, "Routine applied successfully", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "Routine applied successfully for userId: " + userID + ", routineId: " + routineId);
                 } else {
                     String errorMsg = response.body() != null ? response.body().getDescription() : response.message();
@@ -130,14 +138,14 @@ public class RoutineDetailActivity extends AppCompatActivity {
                             Log.e(TAG, "Error reading error body: " + e.getMessage());
                         }
                     }
-                    Toast.makeText(RoutineDetailActivity.this, "Failed to apply routine: " + errorMsg, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ManagerRoutineDetailActivity.this, "Failed to apply routine: " + errorMsg, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<RoutineResponse> call, Throwable t) {
                 Log.e(TAG, "Apply routine API call failed: " + t.getMessage(), t);
-                Toast.makeText(RoutineDetailActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ManagerRoutineDetailActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -152,7 +160,7 @@ public class RoutineDetailActivity extends AppCompatActivity {
                     RoutineResponse.RoutineData data = response.body().getData();
                     if (data == null) {
                         Log.e(TAG, "Routine data is null");
-                        Toast.makeText(RoutineDetailActivity.this, "No routine data found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ManagerRoutineDetailActivity.this, "No routine data found", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     routineNameTextView.setText(data.getRoutineName() != null ? data.getRoutineName() : "N/A");
@@ -198,14 +206,14 @@ public class RoutineDetailActivity extends AppCompatActivity {
                             Log.e(TAG, "Error reading error body: " + e.getMessage());
                         }
                     }
-                    Toast.makeText(RoutineDetailActivity.this, "Failed to load routine: " + errorMsg, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ManagerRoutineDetailActivity.this, "Failed to load routine: " + errorMsg, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<RoutineResponse> call, Throwable t) {
                 Log.e(TAG, "API Call Failed: " + t.getMessage(), t);
-                Toast.makeText(RoutineDetailActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ManagerRoutineDetailActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -49,6 +49,16 @@
             android:text="Shop"
             android:textSize="18sp"
             android:backgroundTint="#4CAF50"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/feedback_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Feedback"
+            android:textSize="18sp"
+            android:backgroundTint="#4CAF50"
             android:textColor="@android:color/white" />
     </LinearLayout>
 

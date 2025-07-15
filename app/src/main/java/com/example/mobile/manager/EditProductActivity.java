@@ -1,7 +1,6 @@
 package com.example.mobile.manager;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -144,7 +143,7 @@ public class EditProductActivity extends AppCompatActivity {
     private void loadProductDetails(String productID) {
         progressDialog.show();
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<ProductResponse> call = apiService.getProductById(productID);
+        Call<ProductResponse> call = apiService.getFilterProductById(productID);
 
         call.enqueue(new Callback<ProductResponse>() {
             @Override

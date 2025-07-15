@@ -74,7 +74,7 @@ public class ResultActivity extends AppCompatActivity {
 
     private void loadRoutines() {
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<ResponseBody> call = apiService.getSkinCareRoutines();
+        Call<ResponseBody> call = apiService.getSkinCareResult();
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

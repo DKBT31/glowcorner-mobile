@@ -4,8 +4,8 @@
         android:id="@+id/menu_profile"
         android:title="Profile" />
     <item
-        android:id="@+id/menu_orders"
-        android:title="My Orders" />
+        android:id="@+id/menu_routine"
+        android:title="My Routines" />
     <item
         android:id="@+id/menu_logout"
         android:title="Logout" />
