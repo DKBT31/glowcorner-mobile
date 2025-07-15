@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="#FFFFFF"
+    android:layout_marginBottom="8dp">
+
+    <!-- Routine Info Section (copy from item_routine.xml, add your fields here) -->
+    <TextView
+        android:id="@+id/routine_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Routine Title"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/routine_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Routine Description"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Action Buttons for Manager -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/update_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update"
+            android:layout_marginEnd="8dp"
+            android:backgroundTint="#03A9F4"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete"
+            android:backgroundTint="#F44336"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+</LinearLayout>
+

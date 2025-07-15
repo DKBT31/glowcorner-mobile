@@ -7,9 +7,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +38,10 @@ public class ManagerUsersActivity extends AppCompatActivity {
     private RecyclerView userList;
     private ProgressDialog progressDialog;
     private UserAdapter userAdapter;
+    private EditText searchInput;
+    private Spinner roleFilter;
+    private List<User> allUsers; // Lưu toàn bộ user để filter client
+    private String selectedRole = "ALL";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +62,28 @@ public class ManagerUsersActivity extends AppCompatActivity {
             // Logic to be added later
         });
 
+        searchInput = findViewById(R.id.search_input);
+        roleFilter = findViewById(R.id.role_filter);
+        Button filterButton = findViewById(R.id.filter_button);
+
+        // Thiết lập spinner role
+        String[] roles = {"ALL", "CUSTOMER", "MANAGER", "STAFF"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, roles);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        roleFilter.setAdapter(adapter);
+        roleFilter.setSelection(0);
+        roleFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedRole = roles[position];
+                runFilter();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        filterButton.setOnClickListener(v -> runFilter());
+
         loadUsers();
     }
 
@@ -67,7 +97,8 @@ public class ManagerUsersActivity extends AppCompatActivity {
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                 progressDialog.dismiss();
                 if (response.isSuccessful() && response.body() != null) {
-                    userAdapter.setUsers(response.body());
+                    allUsers = response.body(); // Lưu lại toàn bộ user
+                    userAdapter.setUsers(allUsers);
                 } else {
                     String errorMsg = response.message();
                     Log.e(TAG, "Load Users Response unsuccessful: " + errorMsg);
@@ -82,6 +113,24 @@ public class ManagerUsersActivity extends AppCompatActivity {
                 Toast.makeText(ManagerUsersActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // Hàm filter tổng hợp theo input và role
+    private void runFilter() {
+        String query = searchInput.getText().toString().trim().toLowerCase();
+        if (allUsers == null) return;
+        List<User> filtered = new java.util.ArrayList<>();
+        for (User user : allUsers) {
+            boolean matchRole = selectedRole.equals("ALL") || (user.getRole() != null && user.getRole().equalsIgnoreCase(selectedRole));
+            boolean matchQuery = query.isEmpty() ||
+                (user.getUserID() != null && user.getUserID().toLowerCase().contains(query)) ||
+                (user.getFullName() != null && user.getFullName().toLowerCase().contains(query)) ||
+                (user.getRole() != null && user.getRole().toLowerCase().contains(query));
+            if (matchRole && matchQuery) {
+                filtered.add(user);
+            }
+        }
+        userAdapter.setUsers(filtered);
     }
 
     private class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {

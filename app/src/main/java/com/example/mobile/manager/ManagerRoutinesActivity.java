@@ -15,11 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.mobile.Adapter.RoutineAdapter;
+import com.example.mobile.Adapter.ManagerRoutineAdapter;
 import com.example.mobile.Api.ApiClient;
 import com.example.mobile.Api.ApiService;
 import com.example.mobile.Models.Routine;
-import com.example.mobile.manager.ManagerRoutineDetailActivity;
 import com.example.mobile.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -33,12 +32,12 @@ import retrofit2.Response;
 public class ManagerRoutinesActivity extends AppCompatActivity {
     private static final String TAG = "ManagerRoutinesActivity";
     private RecyclerView routinesRecyclerView;
-    private RoutineAdapter routineAdapter;
+    private ManagerRoutineAdapter routineAdapter;
     private EditText searchNameEditText, routineIdEditText;
     private Spinner skinTypeSpinner;
     private Button searchNameButton, searchIdButton, filterButton;
     private LinearLayout filtersLayout;
-    private FloatingActionButton createButton, updateButton, deleteButton;
+    private FloatingActionButton createButton;
     private List<Routine> routines = new ArrayList<>();
 
     @Override
@@ -48,11 +47,31 @@ public class ManagerRoutinesActivity extends AppCompatActivity {
 
         routinesRecyclerView = findViewById(R.id.routines_recycler_view);
         routinesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        routineAdapter = new RoutineAdapter(this, routine -> {
-            Intent intent = new Intent(ManagerRoutinesActivity.this, ManagerRoutineDetailActivity.class);
-            intent.putExtra("routineID", routine.getRoutineID());
-            startActivity(intent);
+
+        routineAdapter = new ManagerRoutineAdapter(this, new ManagerRoutineAdapter.OnRoutineActionListener() {
+            @Override
+            public void onUpdate(Routine routine) {
+                Toast.makeText(ManagerRoutinesActivity.this, "Update: " + routine.getRoutineName(), Toast.LENGTH_SHORT).show();
+                // TODO: Mở trang chỉnh sửa
+                Intent intent = new Intent(ManagerRoutinesActivity.this, ManagerRoutineDetailActivity.class);
+                intent.putExtra("routineID", routine.getRoutineID());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onDelete(Routine routine) {
+                Toast.makeText(ManagerRoutinesActivity.this, "Delete: " + routine.getRoutineName(), Toast.LENGTH_SHORT).show();
+                // TODO: Gọi API xoá routine ở đây
+            }
+
+            @Override
+            public void onRoutineClick(Routine routine) {
+                Intent intent = new Intent(ManagerRoutinesActivity.this, ManagerRoutineDetailActivity.class);
+                intent.putExtra("routineID", routine.getRoutineID());
+                startActivity(intent);
+            }
         });
+
         routinesRecyclerView.setAdapter(routineAdapter);
 
         searchNameEditText = findViewById(R.id.search_name_edit_text);
@@ -63,8 +82,6 @@ public class ManagerRoutinesActivity extends AppCompatActivity {
         filterButton = findViewById(R.id.filter_button);
         filtersLayout = findViewById(R.id.filters_layout);
         createButton = findViewById(R.id.create_button);
-        updateButton = findViewById(R.id.update_button);
-        deleteButton = findViewById(R.id.delete_button);
 
         // Set up spinner with skin types
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -76,16 +93,7 @@ public class ManagerRoutinesActivity extends AppCompatActivity {
         searchIdButton.setOnClickListener(v -> handleSearchById());
         filterButton.setOnClickListener(v -> handleFilterBySkinType());
         createButton.setOnClickListener(v -> {
-            // Placeholder for create logic
             Toast.makeText(this, "Create routine (to be implemented)", Toast.LENGTH_SHORT).show();
-        });
-        updateButton.setOnClickListener(v -> {
-            // Placeholder for update logic
-            Toast.makeText(this, "Update routine (to be implemented)", Toast.LENGTH_SHORT).show();
-        });
-        deleteButton.setOnClickListener(v -> {
-            // Placeholder for delete logic
-            Toast.makeText(this, "Delete routine (to be implemented)", Toast.LENGTH_SHORT).show();
         });
 
         loadRoutines();
@@ -99,13 +107,10 @@ public class ManagerRoutinesActivity extends AppCompatActivity {
             public void onResponse(Call<List<Routine>> call, Response<List<Routine>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Routine> routineList = response.body();
-                    if (!routineList.isEmpty()) {
-                        routines.clear();
-                        routines.addAll(routineList);
-                        routineAdapter.setRoutines(routines);
-                    } else {
-                        routines.clear();
-                        routineAdapter.setRoutines(routines);
+                    routines.clear();
+                    routines.addAll(routineList);
+                    routineAdapter.setRoutines(routines);
+                    if (routineList.isEmpty()) {
                         Toast.makeText(ManagerRoutinesActivity.this, "No routines found", Toast.LENGTH_SHORT).show();
                     }
                 } else {
@@ -134,15 +139,13 @@ public class ManagerRoutinesActivity extends AppCompatActivity {
             public void onResponse(Call<List<Routine>> call, Response<List<Routine>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Routine> routineList = response.body();
-                    if (!routineList.isEmpty()) {
-                        routines.clear();
-                        routines.addAll(routineList);
-                        routineAdapter.setRoutines(routines);
-                        Toast.makeText(ManagerRoutinesActivity.this, "Found " + routines.size() + " routines", Toast.LENGTH_SHORT).show();
-                    } else {
-                        routines.clear();
-                        routineAdapter.setRoutines(routines);
+                    routines.clear();
+                    routines.addAll(routineList);
+                    routineAdapter.setRoutines(routines);
+                    if (routineList.isEmpty()) {
                         Toast.makeText(ManagerRoutinesActivity.this, "No routines found", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(ManagerRoutinesActivity.this, "Found " + routines.size() + " routines", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(ManagerRoutinesActivity.this, "Search failed. Status: " + response.code(), Toast.LENGTH_SHORT).show();
@@ -169,15 +172,13 @@ public class ManagerRoutinesActivity extends AppCompatActivity {
             public void onResponse(Call<List<Routine>> call, Response<List<Routine>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Routine> routineList = response.body();
-                    if (!routineList.isEmpty()) {
-                        routines.clear();
-                        routines.addAll(routineList);
-                        routineAdapter.setRoutines(routines);
-                        Toast.makeText(ManagerRoutinesActivity.this, "Routine found", Toast.LENGTH_SHORT).show();
-                    } else {
-                        routines.clear();
-                        routineAdapter.setRoutines(routines);
+                    routines.clear();
+                    routines.addAll(routineList);
+                    routineAdapter.setRoutines(routines);
+                    if (routineList.isEmpty()) {
                         Toast.makeText(ManagerRoutinesActivity.this, "No routine found", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(ManagerRoutinesActivity.this, "Routine found", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(ManagerRoutinesActivity.this, "Search by ID failed. Status: " + response.code(), Toast.LENGTH_SHORT).show();
@@ -205,15 +206,13 @@ public class ManagerRoutinesActivity extends AppCompatActivity {
             public void onResponse(Call<List<Routine>> call, Response<List<Routine>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Routine> routineList = response.body();
-                    if (!routineList.isEmpty()) {
-                        routines.clear();
-                        routines.addAll(routineList);
-                        routineAdapter.setRoutines(routines);
-                        Toast.makeText(ManagerRoutinesActivity.this, "Filtered " + routines.size() + " routines", Toast.LENGTH_SHORT).show();
-                    } else {
-                        routines.clear();
-                        routineAdapter.setRoutines(routines);
+                    routines.clear();
+                    routines.addAll(routineList);
+                    routineAdapter.setRoutines(routines);
+                    if (routineList.isEmpty()) {
                         Toast.makeText(ManagerRoutinesActivity.this, "No routines found", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(ManagerRoutinesActivity.this, "Filtered " + routines.size() + " routines", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(ManagerRoutinesActivity.this, "Filter failed. Status: " + response.code(), Toast.LENGTH_SHORT).show();
