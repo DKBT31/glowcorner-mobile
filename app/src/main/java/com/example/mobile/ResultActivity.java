@@ -150,8 +150,39 @@ public class ResultActivity extends AppCompatActivity {
                             String currentSkinType = dataObject.get("skinType").getAsString();
 
                             if (!currentSkinType.equals(skinType)) {
-                                // Placeholder for update API call
-                                Toast.makeText(ResultActivity.this, "Skin type updated to " + skinType, Toast.LENGTH_SHORT).show();
+                                // Lấy các trường hiện tại của user
+                                String fullName = dataObject.has("fullName") && !dataObject.get("fullName").isJsonNull() ? dataObject.get("fullName").getAsString() : "";
+                                String email = dataObject.has("email") && !dataObject.get("email").isJsonNull() ? dataObject.get("email").getAsString() : "";
+                                String phone = dataObject.has("phone") && !dataObject.get("phone").isJsonNull() ? dataObject.get("phone").getAsString() : "";
+                                String address = dataObject.has("address") && !dataObject.get("address").isJsonNull() ? dataObject.get("address").getAsString() : "";
+
+                                // Gọi API updateUserProfile để cập nhật skinType
+                                ApiService apiService2 = ApiClient.getClient().create(ApiService.class);
+                                // Truyền null cho image nếu không cập nhật ảnh
+                                Call<ResponseBody> updateCall = apiService2.updateUserProfile(
+                                        userId,
+                                        fullName,
+                                        email,
+                                        phone,
+                                        address,
+                                        skinType,
+                                        null
+                                );
+                                updateCall.enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        if (response.isSuccessful()) {
+                                            Toast.makeText(ResultActivity.this, "Skin type updated to " + skinType, Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(ResultActivity.this, "Failed to update skin type", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                        Toast.makeText(ResultActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                             }
                         }
                     } catch (IOException e) {

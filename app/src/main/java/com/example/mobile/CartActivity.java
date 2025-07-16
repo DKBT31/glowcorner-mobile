@@ -63,13 +63,12 @@ public class CartActivity extends AppCompatActivity {
         adapter = new CartAdapter();
         adapter.setOnItemActionListener(new CartAdapter.OnItemActionListener() {
             @Override
-            public void onItemRemoved(String productId) {
-                removeItemFromCart(productId);
-            }
-
-            @Override
-            public void onItemAdded(String productId) {
-                addItemToCart(productId);
+            public void onQuantityChanged(String productId, int newQuantity) {
+                if (newQuantity > 0) {
+                    updateCartItemQuantity(productId, newQuantity);
+                } else {
+                    removeItemFromCart(productId);
+                }
             }
         });
         recyclerView.setAdapter(adapter);
@@ -180,46 +179,26 @@ public class CartActivity extends AppCompatActivity {
         });
     }
 
-    private void addItemToCart(String productId) {
+    private void updateCartItemQuantity(String productId, int newQuantity) {
         String userID = SignInActivity.getStoredValue(this, "userID");
-        Log.d(TAG, "addItemToCart called - UserID: " + userID + ", ProductID: " + productId);
-
         if (userID == null) {
-            Log.e(TAG, "UserID is null, cannot add item");
+            Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show();
             return;
         }
-
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<ResponseBody> call = apiService.addToCart(userID, productId, 1);
-
-        Log.d(TAG, "Making API call to add item: /api/cart/" + userID + "/add/" + productId);
-
+        Call<ResponseBody> call = apiService.updateCartItem(userID, productId, newQuantity);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d(TAG, "Add item response code: " + response.code());
-
                 if (response.isSuccessful()) {
-                    Log.d(TAG, "Item added successfully");
-                    Toast.makeText(CartActivity.this, "Item quantity increased", Toast.LENGTH_SHORT).show();
-                    loadCartItems(); // Refresh the cart
+                    loadCartItems();
                 } else {
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string()
-                                : "Unknown error";
-                        Log.e(TAG, "Failed to add item. Response code: " + response.code() + ", Error: " + errorBody);
-                        Toast.makeText(CartActivity.this, "Failed to add item: " + errorBody, Toast.LENGTH_SHORT)
-                                .show();
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading error response", e);
-                        Toast.makeText(CartActivity.this, "Failed to add item", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(CartActivity.this, "Failed to update quantity", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e(TAG, "Add API call failed: " + t.getMessage(), t);
                 Toast.makeText(CartActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -227,45 +206,24 @@ public class CartActivity extends AppCompatActivity {
 
     private void removeItemFromCart(String productId) {
         String userID = SignInActivity.getStoredValue(this, "userID");
-        Log.d(TAG, "removeItemFromCart called - UserID: " + userID + ", ProductID: " + productId);
-
         if (userID == null) {
-            Log.e(TAG, "UserID is null, cannot remove item");
+            Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show();
             return;
         }
-
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
         Call<ResponseBody> call = apiService.removeFromCart(userID, productId);
-
-        Log.d(TAG, "Making API call to remove item: /api/cart/" + userID + "/remove/" + productId);
-
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d(TAG, "Remove item response code: " + response.code());
-
                 if (response.isSuccessful()) {
-                    Log.d(TAG, "Item removed successfully");
-                    Toast.makeText(CartActivity.this, "Item removed from cart", Toast.LENGTH_SHORT).show();
-                    loadCartItems(); // Refresh the cart
+                    loadCartItems();
                 } else {
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string()
-                                : "Unknown error";
-                        Log.e(TAG,
-                                "Failed to remove item. Response code: " + response.code() + ", Error: " + errorBody);
-                        Toast.makeText(CartActivity.this, "Failed to remove item: " + errorBody, Toast.LENGTH_SHORT)
-                                .show();
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error reading error response", e);
-                        Toast.makeText(CartActivity.this, "Failed to remove item", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(CartActivity.this, "Failed to remove item", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e(TAG, "Remove API call failed: " + t.getMessage(), t);
                 Toast.makeText(CartActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

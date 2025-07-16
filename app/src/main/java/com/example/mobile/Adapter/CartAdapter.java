@@ -30,8 +30,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     private OnItemActionListener listener;
 
     public interface OnItemActionListener {
-        void onItemRemoved(String productId);
-        void onItemAdded(String productId);
+        void onQuantityChanged(String productId, int newQuantity);
     }
 
     public void setOnItemActionListener(OnItemActionListener listener) {
@@ -64,15 +63,15 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         // Handle button clicks
         holder.removeButton.setOnClickListener(v -> {
             if (listener != null) {
-                Log.d(TAG, "Remove button clicked for product: " + item.getProductID());
-                listener.onItemRemoved(item.getProductID());
+                int newQuantity = item.getQuantity() - 1;
+                listener.onQuantityChanged(item.getProductID(), newQuantity);
             }
         });
 
         holder.addButton.setOnClickListener(v -> {
             if (listener != null) {
-                Log.d(TAG, "Add button clicked for product: " + item.getProductID());
-                listener.onItemAdded(item.getProductID());
+                int newQuantity = item.getQuantity() + 1;
+                listener.onQuantityChanged(item.getProductID(), newQuantity);
             }
         });
 
