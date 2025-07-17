@@ -27,9 +27,13 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.HashSet;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -49,6 +53,10 @@ public class QuizActivity extends AppCompatActivity {
     private Map<String, Integer> skinTypeCounts = new HashMap<>();
     private List<String> selectedAnswers = new ArrayList<>();
     private static final int MAX_QUESTIONS = 5;
+
+    private Set<Integer> askedIndexes = new HashSet<>();
+    private boolean isTieBreaker = false;
+    private List<String> tieSkinTypes = new ArrayList<>();
 
     private static class Quiz {
         String questionId;
@@ -164,6 +172,17 @@ public class QuizActivity extends AppCompatActivity {
         Quiz currentQuiz = quizzes.get(currentQuestionIndex);
         List<AnswerOption> currentOptions = currentQuiz.answerOptionDTOS;
 
+        // Nếu đang ở chế độ tie-breaker, chỉ hiển thị các option có skinType thuộc tieSkinTypes
+        if (isTieBreaker && !tieSkinTypes.isEmpty()) {
+            List<AnswerOption> filteredOptions = new ArrayList<>();
+            for (AnswerOption option : currentOptions) {
+                if (tieSkinTypes.contains(option.skinType)) {
+                    filteredOptions.add(option);
+                }
+            }
+            currentOptions = filteredOptions;
+        }
+
         // Inflate card view
         CardView cardView = (CardView) getLayoutInflater().inflate(R.layout.card_quiz, dynamicContent, false);
         TextView quizTextView = cardView.findViewById(R.id.quizText);
@@ -190,11 +209,14 @@ public class QuizActivity extends AppCompatActivity {
         Log.d(TAG, "Progress updated to: " + progress + "%");
 
         nextButton.setEnabled(false); // Disable until an option is selected
+
+        // Make currentOptions effectively final for lambda
+        final List<AnswerOption> finalCurrentOptions = currentOptions;
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             nextButton.setEnabled(true);
             RadioButton selectedRadio = findViewById(checkedId);
             if (selectedRadio != null) {
-                for (AnswerOption option : currentOptions) {
+                for (AnswerOption option : finalCurrentOptions) {
                     if (option.optionText.equals(selectedRadio.getText().toString())) {
                         selectedAnswers.add(option.optionText);
                         skinTypeCounts.put(option.skinType, skinTypeCounts.getOrDefault(option.skinType, 0) + 1);
@@ -222,14 +244,30 @@ public class QuizActivity extends AppCompatActivity {
             return;
         }
 
-        if (currentQuestionIndex < MAX_QUESTIONS - 1) {
+        // Đánh dấu câu hỏi đã hỏi
+        askedIndexes.add(currentQuestionIndex);
+
+        if (!isTieBreaker && currentQuestionIndex < MAX_QUESTIONS - 1) {
             currentQuestionIndex++;
             displayQuestion();
             nextButton.setEnabled(false); // Disable after moving to next question
             Log.d(TAG, "Moved to question " + (currentQuestionIndex + 1));
         } else {
-            // Determine skin type after 5th question
-            String determinedSkinType = determineSkinType();
+            // Determine skin type after 5th question or tie-breaker
+            List<String> maxSkinTypes = getMaxSkinTypes();
+            if (maxSkinTypes.size() > 1) {
+                // Tie detected, chọn random 1 quiz bất kỳ để hỏi lại
+                int randomIdx = new Random().nextInt(quizzes.size());
+                currentQuestionIndex = randomIdx;
+                isTieBreaker = true;
+                tieSkinTypes = maxSkinTypes;
+                displayQuestion();
+                nextButton.setEnabled(false);
+                Log.d(TAG, "Tie detected. Showing tie-breaker question at index: " + randomIdx);
+                return;
+            }
+            // Nếu không còn tie hoặc đã phân biệt được
+            String determinedSkinType = maxSkinTypes.get(0);
             Log.d(TAG, "Determined skin type: " + determinedSkinType);
             Intent intent = new Intent(QuizActivity.this, ResultActivity.class);
             intent.putExtra("skinType", determinedSkinType);
@@ -238,19 +276,22 @@ public class QuizActivity extends AppCompatActivity {
         }
     }
 
-    private String determineSkinType() {
-        if (skinTypeCounts.isEmpty()) {
-            Log.w(TAG, "No skin type counts available");
-            return "Unknown";
-        }
+    // Trả về danh sách skinType có count cao nhất (có thể nhiều hơn 1 nếu bằng nhau)
+    private List<String> getMaxSkinTypes() {
+        List<String> result = new ArrayList<>();
         int maxCount = 0;
-        String mostCommonSkinType = "Unknown";
         for (Map.Entry<String, Integer> entry : skinTypeCounts.entrySet()) {
             if (entry.getValue() > maxCount) {
                 maxCount = entry.getValue();
-                mostCommonSkinType = entry.getKey();
             }
         }
-        return mostCommonSkinType;
+        for (Map.Entry<String, Integer> entry : skinTypeCounts.entrySet()) {
+            if (entry.getValue() == maxCount) {
+                result.add(entry.getKey());
+            }
+        }
+        // Nếu chưa chọn gì, trả về Unknown
+        if (result.isEmpty()) result.add("Unknown");
+        return result;
     }
 }
